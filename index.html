@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DAFTAR SOAL PRC EDISI SAT</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ background:#08143b; font-family:'Baloo 2',sans-serif; color:#fff4d7; overflow-x:hidden; }
+.screen{ display:none; min-height:100vh; padding:20px; }
+.active{ display:block; }
+.container{ max-width:900px; margin:auto; }
+.pixel{ font-family:'Press Start 2P',cursive; }
+.card{ background:#121f58; border:6px solid #f4ca64; padding:25px; margin-bottom:25px; box-shadow:0 10px 0 #020818; position: relative; }
+.title{ font-size:42px; line-height:1.5; color:#f4ca64; margin-bottom:30px; }
+.btn{ width:100%; padding:18px; border:none; cursor:pointer; font-size:20px; font-weight:bold; margin-top:15px; transition:0.2s; text-align: center; display: block; text-decoration: none; }
+.btn:hover{ transform:translateY(3px); }
+.btn-main{ background:#42f2b8; color:black; border:4px solid #d8ffe8; }
+.btn-pink{ background:#ff5c8a; color:white; border:4px solid #ffd2df; }
+.btn-danger{ background:#ff4a4a; color:white; border:4px solid #ffb3b3; padding: 10px; font-size: 16px; }
+.btn-dark{ background:#24356e; color:white; border:4px solid #dce4ff; }
+.level{ margin-bottom:25px; }
+.level h2{ font-size:30px; margin-bottom:10px; color:#f4ca64; }
+.progress{ height:20px; background:#1c2755; border:4px solid #7df5e6; overflow:hidden; margin-top:10px; }
+.progress-bar{ height:100%; background:#42f2b8; width:0%; transition: width 0.5s ease; }
+.question{ font-size:30px; font-weight:bold; margin-bottom:30px; line-height:1.5; }
+.option{ background:#303a68; border:4px solid #8b8b8b; padding:20px; margin-bottom:15px; cursor:pointer; font-size:22px; font-weight:bold; transition:0.2s; }
+.option:hover{ border-color:#67f5e7; transform:translateX(5px); }
+.hearts{ font-size:35px; margin-bottom:20px; letter-spacing: 5px; }
+textarea, input, select{ width:100%; padding:15px; margin-top:10px; margin-bottom:20px; background:#1c2755; border:2px solid #303a68; color:white; font-size:18px; border-radius: 4px; }
+textarea:focus, input:focus, select:focus { outline: none; border-color: #f4ca64; }
+.admin-box{ background:#1c2755; padding:25px; margin-top:25px; border:4px solid #67f5e7; position: relative; }
+.question-box-admin { background: #121f58; padding: 15px; margin-top: 15px; border: 2px dashed #f4ca64; }
+.center{ text-align:center; }
+.badge{ display:inline-block; padding:10px 15px; background:#43f1d0; color:black; margin-bottom:20px; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 8, 24, 0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+.modal-overlay.active { display: flex; }
+.modal-card { background: #121f58; border: 6px solid #f4ca64; max-width: 500px; width: 100%; padding: 30px; text-align: center; box-shadow: 0 10px 0 #020818; }
+.loading-text { font-size: 24px; text-align: center; margin: 40px 0; color: #67f5e7; }
+</style>
+</head>
+
+<body>
+
+<div id="home" class="screen active">
+<div class="container">
+<div class="card center">
+<div class="badge pixel">QUEST OSN-K CLOUD</div>
+<!-- PERUBAHAN JUDUL COVER UTAMA -->
+<h1 class="title pixel" style="font-size: 34px;">Daftar Soal PRC<br><span style="color:#42f2b8;">Edisi Sat</span></h1>
+<p style="font-size:24px;margin-bottom:30px;">Terhubung langsung dengan database pusat soal online.</p>
+<button class="btn btn-main" onclick="openWorld()">Mulai Game →</button>
+<button class="btn btn-pink" onclick="openAdmin()">Mode Pembuat Soal (Global)</button>
+</div>
+</div>
+</div>
+
+<div id="world" class="screen">
+<div class="container">
+<div class="card">
+<h1 class="title pixel">Pilih Level</h1>
+<div id="loadingWorld" class="loading-text pixel"><i class="fa-solid fa-spinner fa-spin"></i> Memuat Soal...</div>
+<div id="levelList"></div>
+<button class="btn btn-dark" onclick="goHome()">← Kembali ke Utama</button>
+</div>
+</div>
+</div>
+
+<div id="quiz" class="screen">
+<div class="container">
+<div class="card">
+<div class="hearts" id="hearts">❤️❤️❤️</div>
+<div class="question" id="question"></div>
+<div id="options"></div>
+</div>
+</div>
+</div>
+
+<div id="feedbackModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2 id="feedbackTitle" class="pixel" style="font-size: 28px; margin-bottom: 20px;">BENAR!</h2>
+        <div id="feedbackIcon" style="font-size: 60px; margin-bottom: 20px;"></div>
+        <p id="feedbackText" style="font-size: 20px; margin-bottom: 20px;"></p>
+        <button id="feedbackBtn" class="btn btn-main">Lanjut →</button>
+    </div>
+</div>
+
+<div id="result" class="screen">
+<div class="container">
+<div class="card center">
+<h1 class="title pixel">Level Selesai!</h1>
+<div id="scoreText" style="font-size:60px; font-weight:bold; color:#42f2b8; margin-bottom:30px;">0%</div>
+<p id="resultSummary" style="font-size: 22px; margin-bottom: 25px;"></p>
+<button class="btn btn-main" onclick="openWorld()">Kerjakan Soal Lain →</button>
+</div>
+</div>
+</div>
+
+<div id="admin" class="screen">
+<div class="container">
+<div class="card">
+<h1 class="title pixel">Editor Soal Global</h1>
+<p style="margin-bottom:15px; color:#aaa;">Perubahan di sini langsung merubah soal di semua perangkat user.</p>
+<button class="btn btn-main" onclick="addLevel()" style="margin-bottom: 20px;">+ Tambah Level Baru</button>
+<div id="loadingAdmin" class="loading-text pixel"><i class="fa-solid fa-spinner fa-spin"></i> Menyinkronkan...</div>
+<div id="adminLevels"></div>
+<button class="btn btn-dark" onclick="goHome()" style="margin-top: 20px;">← Kembali ke Utama</button>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+// ====== INTEGRASI DATA PUSAT FIREBASE PRC-SAT1 ======
+const firebaseConfig = {
+  apiKey: "AIzaSyBkz8DQw0KUKcQgENGpdjWgBI18RBwirWw",
+  authDomain: "prc-sat1.firebaseapp.com",
+  databaseURL: "https://prc-sat1-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "prc-sat1",
+  storageBucket: "prc-sat1.firebasestorage.app",
+  messagingSenderId: "113542679647",
+  appId: "1:113542679647:web:30aacda41a3af811b7dfea",
+  measurementId: "G-08H2ZF5E7K"
+};
+
+// Inisialisasi Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+// PERUBAHAN JALUR NODE DATABASE PUSAT
+const dbRef = ref(db, 'prcEdisiSatData');
+
+// Variabel Global Aplikasi
+let levels = [];
+let currentLevel = 0;
+let currentQuestion = 0;
+let score = 0;
+let lives = 3;
+
+// MENDENGARKAN DATA BERUBAH SECARA REAL-TIME DARI SERVER
+onValue(dbRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        levels = data;
+    } else {
+        // Jika Database kosong di cloud, isi dengan data default cetakan pertama
+        levels = [
+            {
+                name:'Aljabar Boolean',
+                icon:'🧠',
+                progress:0,
+                questions:[
+                    {
+                        question:'Manakah di bawah ini yang merupakan simbol dari operasi logika Union / Gabungan pada teori himpunan?',
+                        options:['∪', '∩', '¬', '⊕'],
+                        answer:0
+                    }
+                ]
+            }
+        ];
+        saveToCloud();
+    }
+    // Sembunyikan indikator loading jika data selesai ditarik
+    if(document.getElementById('loadingWorld')) document.getElementById('loadingWorld').style.display = 'none';
+    if(document.getElementById('loadingAdmin')) document.getElementById('loadingAdmin').style.display = 'none';
+    
+    // Perbarui visual halaman jika user sedang membuka menu tertentu
+    if(document.getElementById('world').classList.contains('active')) renderLevels();
+    if(document.getElementById('admin').classList.contains('active')) renderAdmin();
+});
+
+function saveToCloud(){
+    set(dbRef, levels);
+}
+
+// Navigasi Layar
+window.show = function(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+}
+
+window.goHome = function(){ show('home'); }
+window.openWorld = function(){ show('world'); renderLevels(); }
+
+window.renderLevels = function(){
+    const list = document.getElementById('levelList');
+    list.innerHTML='';
+    
+    levels.forEach((level, index)=>{
+        let totalQ = level.questions ? level.questions.length : 0;
+        list.innerHTML += `
+            <div class="card level">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="font-size:50px;">${level.icon || '🎮'}</div>
+                    <div style="flex-grow:1;">
+                        <h2>${level.name}</h2>
+                        <p style="font-size: 16px; color: #aaa;">Total: ${totalQ} Soal</p>
+                    </div>
+                </div>
+                <div class="progress"><div class="progress-bar" style="width:${level.progress || 0}%"></div></div>
+                <div style="margin-top:10px; font-size:18px; display:flex; justify-content:space-between;">
+                    <span>Skor Tertinggi Anda:</span><strong>${level.progress || 0}%</strong>
+                </div>
+                <button class="btn btn-main" onclick="startLevel(${index})" ${totalQ === 0 ? 'disabled' : ''}>
+                    ${totalQ === 0 ? 'Soal Kosong' : 'Masuk Dungeon →'}
+                </button>
+            </div>
+        `;
+    });
+}
+
+window.startLevel = function(index){
+    currentLevel=index; currentQuestion=0; score=0; lives=3;
+    show('quiz');
+    renderQuestion();
+}
+
+window.renderQuestion = function(){
+    const q = levels[currentLevel].questions[currentQuestion];
+    if(!q){ finishLevel(); return; }
+
+    let hearts='';
+    for(let i=0; i<3; i++){ hearts += (i < lives) ? '❤️' : '🖤'; }
+    document.getElementById('hearts').innerHTML = hearts;
+    document.getElementById('question').innerHTML = `${currentQuestion + 1}. ${q.question}`;
+
+    const optionsContainer = document.getElementById('options');
+    optionsContainer.innerHTML='';
+    q.options.forEach((opt, index)=>{
+        optionsContainer.innerHTML += `<div class="option" onclick="checkAnswer(${index})"><span style="color:#f4ca64;">${String.fromCharCode(65+index)}.</span> ${opt}</div>`;
+    });
+}
+
+window.checkAnswer = function(selectedIndex){
+    const q = levels[currentLevel].questions[currentQuestion];
+    const modal = document.getElementById('feedbackModal');
+    const title = document.getElementById('feedbackTitle');
+    const icon = document.getElementById('feedbackIcon');
+    const text = document.getElementById('feedbackText');
+    const btn = document.getElementById('feedbackBtn');
+
+    if(selectedIndex === q.answer){
+        score++;
+        title.innerText = "BENAR!"; title.style.color = "#42f2b8";
+        icon.innerHTML = "<i class='fa-solid fa-circle-check' style='color:#42f2b8;'></i>";
+        text.innerText = "Logikamu tajam! Lanjut ke tantangan berikutnya.";
+        btn.onclick = function() { modal.classList.remove('active'); currentQuestion++; renderQuestion(); };
+    } else {
+        lives--;
+        title.innerText = "SALAH!"; title.style.color = "#ff5c8a";
+        icon.innerHTML = "<i class='fa-solid fa-heart-crack' style='color:#ff5c8a;'></i>";
+        text.innerText = `Jawaban benar: ${String.fromCharCode(65+q.answer)}. ${q.options[q.answer]}`;
+        btn.onclick = function() { modal.classList.remove('active'); if(lives<=0){ showGameOver(); }else{ currentQuestion++; renderQuestion(); } };
+    }
+    modal.classList.add('active');
+}
+
+function showGameOver() {
+    const modal = document.getElementById('feedbackModal');
+    const btn = document.getElementById('feedbackBtn');
+    document.getElementById('feedbackTitle').innerText = "GAME OVER";
+    document.getElementById('feedbackIcon').innerHTML = "<i class='fa-solid fa-skull-crossbones' style='color:#ff4a4a;'></i>";
+    document.getElementById('feedbackText').innerText = "Kamu kehabisan nyawa!";
+    btn.innerText = "Kembali";
+    btn.onclick = function() { modal.classList.remove('active'); btn.innerText = "Lanjut →"; openWorld(); };
+    modal.classList.add('active');
+}
+
+function finishLevel(){
+    let total = levels[currentLevel].questions.length;
+    let percent = Math.round((score/total)*100);
+    if(percent > (levels[currentLevel].progress || 0)) {
+        levels[currentLevel].progress = percent;
+    }
+    show('result');
+    document.getElementById('scoreText').innerHTML = percent + '%';
+    document.getElementById('resultSummary').innerHTML = `Kamu berhasil menjawab benar <strong>${score}</strong> dari <strong>${total}</strong> total soal.`;
+}
+
+// Logika Admin (Simpan langsung menulis ke Cloud)
+window.openAdmin = function(){ show('admin'); renderAdmin(); }
+
+window.renderAdmin = function(){
+    const adminContainer = document.getElementById('adminLevels');
+    adminContainer.innerHTML='';
+    levels.forEach((level, lIndex)=>{
+        let questionsHtml = '';
+        if(level.questions){
+            level.questions.forEach((q, qIndex)=>{
+                let optionsInputs = '';
+                q.options.forEach((opt, oIndex)=>{
+                    optionsInputs += `
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                            <span class="pixel" style="font-size:14px; width:25px;">${String.fromCharCode(65+oIndex)}</span>
+                            <input type="text" value="${opt}" style="margin:0;" onchange="window.editOption(${lIndex}, ${qIndex}, ${oIndex}, this.value)">
+                        </div>`;
+                });
+                let selectOptions = '';
+                q.options.forEach((opt, oIndex)=>{ selectOptions += `<option value="${oIndex}" ${q.answer == oIndex ? 'selected' : ''}>Opsi ${String.fromCharCode(65+oIndex)}</option>`; });
+
+                questionsHtml += `
+                    <div class="question-box-admin">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong>Soal Nomor ${qIndex + 1}</strong>
+                            <button class="btn btn-danger" style="margin:0; width:auto; padding:5px 10px;" onclick="window.deleteQuestion(${lIndex}, ${qIndex})"><i class="fa-solid fa-trash"></i> Hapus</button>
+                        </div>
+                        <textarea rows="2" onchange="window.editQuestionText(${lIndex}, ${qIndex}, this.value)">${q.question}</textarea>
+                        ${optionsInputs}
+                        <select onchange="window.editAnswer(${lIndex}, ${qIndex}, this.value)">${selectOptions}</select>
+                    </div>`;
+            });
+        }
+        adminContainer.innerHTML += `
+            <div class="admin-box">
+                <button class="btn btn-danger" style="position:absolute; top:15px; right:15px; width:auto; padding:8px 15px;" onclick="window.deleteLevel(${lIndex})">Hapus Level</button>
+                <div style="display:grid; grid-template-columns: 3fr 1fr; gap:15px; margin-top:20px;">
+                    <div><label>Nama Level</label><input value="${level.name}" onchange="window.editLevel(${lIndex}, this.value)"></div>
+                    <div><label>Ikon</label><input value="${level.icon || '🎮'}" onchange="window.editIcon(${lIndex}, this.value)"></div>
+                </div>
+                <div style="margin-top:10px;">${questionsHtml}</div>
+                <button class="btn btn-pink" style="margin-top:15px;" onclick="window.addQuestion(${lIndex})">+ Tambah Pertanyaan</button>
+            </div>`;
+    });
+}
+
+window.editLevel = function(index, value){ levels[index].name = value; saveToCloud(); }
+window.editIcon = function(index, value){ levels[index].icon = value; saveToCloud(); }
+window.editQuestionText = function(lIndex, qIndex, value){ levels[lIndex].questions[qIndex].question = value; saveToCloud(); }
+window.editOption = function(lIndex, qIndex, oIndex, value){ levels[lIndex].questions[qIndex].options[oIndex] = value; saveToCloud(); }
+window.editAnswer = function(lIndex, qIndex, value){ levels[lIndex].questions[qIndex].answer = parseInt(value); saveToCloud(); }
+
+window.addLevel = function(){
+    levels.push({ name: 'Dungeon Baru', icon: '⚔️', progress: 0, questions: [] });
+    saveToCloud();
+}
+window.deleteLevel = function(index){
+    if(confirm("Hapus level global?")){ levels.splice(index, 1); saveToCloud(); }
+}
+window.addQuestion = function(index){
+    if(!levels[index].questions) levels[index].questions = [];
+    levels[index].questions.push({ question: 'Pertanyaan baru...', options: ['Opsi A', 'Opsi B', 'Opsi C', 'Opsi D'], answer: 0 });
+    saveToCloud();
+}
+window.deleteQuestion = function(lIndex, qIndex){
+    levels[lIndex].questions.splice(qIndex, 1); saveToCloud();
+}
+</script>
+</body>
+</html>
